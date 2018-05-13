@@ -1,0 +1,22 @@
+/*
+ * Copyright (c) 2017, 2018, Bus24 and/or its affiliates. All rights reserved.
+ * Bus24 PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
+*/
+package com.bus24.web.service;
+
+import org.springframework.stereotype.Service;
+
+/**
+ * @author mulayam
+ * @version 1.0
+ */
+@Service
+public class TravelServiceImp implements TravelService {
+
+	@Override
+	public String getAllTravel() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+}

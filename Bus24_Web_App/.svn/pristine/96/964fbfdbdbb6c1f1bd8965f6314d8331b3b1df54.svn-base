@@ -1,0 +1,44 @@
+<html ng-app="passenger_register" >
+<head>
+<script src="js/angular.js"></script>
+<script>
+var  app=angular.module("passenger_register",[]);
+app.controller("passenger_reg_controller",
+		function($scope,$window,$http){
+	$scope.registerPassenger=function(){
+    $window.alert($scope.email+" "+$scope.mobile+" "+$scope.password);
+
+     $http({
+    	method:"post",
+    	url:"/Bus24/register",
+    	params:{
+    	"email":$scope.email,
+    	 "mobile":$scope.mobile,
+    	 "password":$scope.password
+    	}
+     }).then(function(result){
+    	 $window.alert("success : "+result);
+     },function(result){
+    	 $window.alert("Failure : "+result);
+     });
+    
+	}
+	
+	
+});
+</script>
+</head>
+<body ng-controller="passenger_reg_controller">
+<h1 align="center">Passenger Registration Form</h1><hr/>
+<div >
+<table align="center" ><tr><td>
+Email :</td><td><input type="text" ng-model="email"/></td></tr>
+<tr><td>Mobile:</td><td><input type="text" ng-model="mobile"/></td></tr>
+<tr><td>Password:</td><td><input type="password" ng-model="password"/></td> </tr>
+<tr><td colspan="2" align="center">
+<button  value="Register" 
+ng-click="registerPassenger()">Register</button></td> </tr>
+</table>
+</div>
+</body>
+</html>

@@ -1,0 +1,24 @@
+package com.bus24.web.service;
+
+public interface BookingService {
+
+	/**
+	 * This method return the list of all passenger with passengerId,
+	 * name,age,bookingId,seatNo,status of specific routeId
+	 * 
+	 * 
+	 * @return Return jsonPassenger
+	 * @author mulayam
+	 */
+	public String getAllPassengers(Integer routeId);
+
+	/**
+	 * This method process ticket booking
+	 * 
+	 * @param jsonBooking
+	 * @return
+	 * @author mulayam
+	 */
+	public String bookTicket(String jsonBooking);
+
+}

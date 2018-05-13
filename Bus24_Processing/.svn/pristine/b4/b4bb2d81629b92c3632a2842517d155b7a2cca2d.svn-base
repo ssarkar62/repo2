@@ -1,0 +1,64 @@
+package com.bus24.service;
+
+import javax.xml.ws.ServiceMode;
+
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.bus24.beans.Response;
+import com.bus24.beans.Travel;
+import com.bus24.dao.TravelsDAO;
+import com.bus24.exceptions.UserNotAuthenticatedException;
+import com.bus24.integration.UserSmsServiceClient;
+import com.bus24.util.JsonUtil;
+import com.bus24.util.SmsTemplates;
+import com.bus24.util.StatusUtil;
+
+@Service
+public class TravelServiceImpl implements TravelService {
+	private static Logger logger = Logger.getLogger(TravelServiceImpl.class);
+	@Autowired
+	private TravelsDAO travelsDAO;
+	@Autowired
+	private UserAuthenticationService userAuthenticationService;
+	@Autowired
+	private UserSmsServiceClient smsServiceClient;
+
+	public String registerTravel(String jsonTravel, Long userId, String token) {
+		Response response = new Response();
+		String jsonResponse = " ";
+		response.setMessage("Travel Registration Failure!Please Try Again.");
+		response.setStatus(StatusUtil.STATUS_FAILURE);
+		Travel travel = JsonUtil.convertJsonToJava(jsonTravel, Travel.class);
+		// check user is authenticated (OR) not
+		try {
+			if (travel != null) {
+				if (userAuthenticationService.isAuthenticated(userId, token)) {
+					// if user authenticated then call DAO's
+					Long travelId = (Long) travelsDAO.registerTravel(travel);
+
+					if (travelId != null && travelId > 0) {
+						// send sms
+						String sms = "Dear travel admin  your registration is complete. - MythriBus;";
+						String smsStatus = smsServiceClient.sendSms(travel.getUser().getMobile(), sms,
+								SmsTemplates.SMS_TEMP_ID_OTP);
+						logger.info("Sms Status : " + smsStatus);
+
+					}
+
+					response.setStatus(StatusUtil.STATUS_SUCCESS);
+					response.setMessage("travel added with id : " + travelId);
+
+				}
+			}
+		} catch (UserNotAuthenticatedException e) {
+			response.setMessage(e.getMessage());
+			response.setStatus(StatusUtil.STATUS_FAILURE);
+		}
+		// return jsonResponse
+		response.setData(jsonResponse);
+		return jsonResponse;
+	}
+
+}

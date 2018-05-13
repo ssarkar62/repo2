@@ -1,0 +1,99 @@
+/*Copyright (c) 2017, 2018, Bus24 and/or its affiliates. All rights reserved.
+ * Bus24 PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
+*/
+
+package com.bus24.service;
+
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
+import org.springframework.security.crypto.bcrypt.BCrypt;
+import org.springframework.stereotype.Service;
+
+import com.bus24.beans.Agents;
+import com.bus24.beans.Response;
+import com.bus24.beans.User;
+import com.bus24.dao.AgentsDAO;
+import com.bus24.exceptions.UserNotAuthenticatedException;
+import com.bus24.integration.UserSmsServiceClient;
+import com.bus24.util.JsonUtil;
+import com.bus24.util.PasswordGenerator;
+import com.bus24.util.SmsTemplates;
+import com.bus24.util.StatusUtil;
+
+/**
+ * This interface is gather agent requirements
+ * 
+ * @author pramod
+ * @since 1.0
+ */
+@Service
+public class AgentServiceImpl implements AgentService {
+	private static Logger logger = Logger.getLogger(AgentServiceImpl.class);
+	@Autowired
+	private AgentsDAO agentDAO;
+	@Autowired
+	private UserAuthenticationService userAuthenticationService;
+	@Autowired
+	private UserSmsServiceClient smsServiceClient;
+
+	public String registerAgent(String jsonAgent, Long userId, String token) {
+		Response response = new Response();
+		String jsonResponse = " ";
+		response.setMessage("Agent Registration Failure!Please Try Again.");
+		response.setStatus(StatusUtil.STATUS_FAILURE);
+
+		try {
+			logger.info("enter into try of registerAgent()");
+			if (userAuthenticationService.isAuthenticated(userId, token)) {
+				logger.info("enter into if of registerAgent()");
+				// convert json to java
+				Agents agent = JsonUtil.convertJsonToJava(jsonAgent, Agents.class);
+				// check user is authenticated or not
+				if (agent != null && agent.getUser() != null && agent.getBankDetails() != null) {
+					User user = agent.getUser();
+					user.setUserName(agent.getEmail());
+					user.setEmail(agent.getEmail());
+					String password = PasswordGenerator.generatePassword();
+					// encript the password
+					user.setPassword(BCrypt.hashpw(password, BCrypt.gensalt()));
+					agent.setUser(user);
+					// if user is authenticated then DAO's
+					Long agentId = (Long) agentDAO.registerAgent(agent);
+
+					if (agentId != null && agentId > 0) {
+						response.setMessage("Agent " + agent.getAgentName() + " registration is successful");
+						response.setStatus(StatusUtil.STATUS_SUCCESS);
+					} // if
+						// send sms
+					String sms = "Dear Agent Use this UserName= " + agent.getUser().getUserName() + " and Password= "
+							+ password + " for Login - Thank you Bus24.com";
+					String smsStatus = smsServiceClient.sendSms(agent.getUser().getMobile(), sms,
+							SmsTemplates.SMS_TEMP_ID_OTP);
+					logger.info("Sms Status : " + smsStatus);
+
+					// send email
+				} // if
+			} // if
+		} catch (UserNotAuthenticatedException e) {
+			logger.info("Exception Occured while Authenticating of User : " + e.getMessage());
+			response.setMessage(e.getMessage());
+			response.setStatus(StatusUtil.STATUS_FAILURE);
+		} catch (DataAccessException de) {
+			logger.info("Exception Occured while Registering the Agent : " + de.getMessage());
+			response.setMessage("Unable to Process Your Request!Please Try Again.");
+			response.setStatus(StatusUtil.STATUS_FAILURE);
+		}catch (Exception e) {
+			logger.info("Exception Occured while Registering the Agent : " + e.getMessage());
+
+			response.setMessage("Unable to Process Your Request!Please Try Again.");
+			response.setStatus(StatusUtil.STATUS_FAILURE);
+		}
+		jsonResponse = JsonUtil.convertJavaToJson(response);
+		logger.info("Response from Register Agent : " + jsonResponse);
+		return jsonResponse;
+	}
+
+}

@@ -1,0 +1,66 @@
+
+package com.bus24.service;
+
+
+
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
+import org.springframework.stereotype.Service;
+
+import com.bus24.beans.Bus;
+import com.bus24.beans.Response;
+import com.bus24.dao.BusDAO;
+import com.bus24.util.JsonUtil;
+import com.bus24.util.StatusUtil;
+@Service
+public class BusServiceImpl implements BusService {
+	@Autowired
+	private BusDAO busDao;
+	@Autowired
+	private UserAuthenticationService userAuthenticationService;
+	
+	Logger logger = Logger.getLogger(BusServiceImpl.class);
+@Override
+public String saveBus(String jsonBus, Long userId, String token) {
+	String jsonResponse = "";
+	logger.info("Entered into saveBus() " + jsonBus + " " + userId + " " + token);
+
+	Response response = new Response();
+	response.setStatus(StatusUtil.STATUS_FAILURE);
+	response.setMessage("Bus not added! Please try again.");
+
+	try {
+
+		if (userAuthenticationService.isAuthenticated(userId, token)) {
+			Bus bus = JsonUtil.convertJsonToJava(jsonBus, Bus.class);
+
+			if (bus != null && bus.getBusType() != null && bus.getListAmenities() != null && userId != null) {
+				if (busDao.saveBus(bus, userId) > 0) {
+					response.setStatus(StatusUtil.STATUS_SUCCESS);
+					response.setMessage("Bus added successfully");
+				}
+			}
+	
+}		
+	} catch (DataAccessException de) {
+		logger.info("Exception Occured while Registering the Travel : " + de.getMessage());
+
+		response.setMessage("Unable to Process Your Request!Please Try Again.");
+		response.setStatus(StatusUtil.STATUS_FAILURE);
+
+		
+	} catch (Exception e) {
+		logger.info("Exception Occured while Registering the Travel : " + e.getMessage());
+
+		response.setMessage("Unable to Process Your Request!Please Try Again.");
+		response.setStatus(StatusUtil.STATUS_FAILURE);
+	}
+	jsonResponse = JsonUtil.convertJavaToJson(response);
+	//logger.info("saveBus() method endded. Response from saveBus " + jsonResponse);
+	return jsonResponse;
+	
+	
+
+}
+}

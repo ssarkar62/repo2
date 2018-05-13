@@ -1,0 +1,35 @@
+<%@page import="com.bus24.util.Roles"%>
+<%@page isELIgnored="false" %>
+<html>
+
+<body>
+<h2>Admin Dashboard</h2>
+welcome , ${userName}&nbsp &nbsp&nbsp &nbsp<a href="logoutUser" style="color: red;">Logout</a><br><br>
+<a href="searchTravel" class="list-group-item">SearchTravel</a> <br>
+<a href="registerAgent" class="list-group-item">RegisterAgent</a> <br>
+
+<%
+response.setHeader("Cache-Control","no-cache"); //HTTP 1.1 
+response.setHeader("Pragma","no-cache"); //HTTP 1.0 
+response.setDateHeader ("Expires", 0); //prevents caching at the proxy server  
+response.setHeader("Cache-Control","no-store"); //Directs caches not to store 
+if(session!=null && session.getAttribute("userId")!=null){
+	System.out.println("if");
+}else{
+	System.out.println("else");
+	response.setHeader("location","loginUser");
+	response.setStatus(301);
+}
+%>
+
+ <%
+ if(session.getAttribute("userRole").equals(Roles.ROLE_SUPER_ADMIN)){
+	
+	 %>
+<h2><a href="addTravel">AddTravel</a></h2> 
+<% 
+ }
+ 
+ %>
+</body>
+</html>

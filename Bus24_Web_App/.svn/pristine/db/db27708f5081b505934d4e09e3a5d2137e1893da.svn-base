@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="app">
+<div ng-controller="search_travel_controller">
+	<label>Enter Travel Name:</label> <input type="text" ng-model="travelName"><br>
+	<label>Enter City:</label> <input type="text" ng-model="city"><br>
+	<button ng-click="searchTravel(travelName,city)">Search</button>
+</div>
+
+<script src="js/angular.js"></script>
+
+<script>
+	var app = angular.module("app", []);
+	app.controller("search_travel_controller", search_travel_controller);
+	function search_travel_controller($scope,$http,$window) {
+		$scope.searchTravel = function(travelName, cityName) {
+			$window.alert(travelName + "......" + cityName );
+			$http({
+				method : "post",
+				url : "/Bus24/searchTravel",
+				params : {
+					"travelName" : travelName,
+					"city" : cityName,
+			    }
+			}).then(function(result) {
+				$window.alert("success");
+				$window.alert(result.data);
+    			
+			}, function(result) {
+				$window.alert("fail");
+				$window.alert(result.data);
+			});
+		}
+	}
+
+</script>
+</html>

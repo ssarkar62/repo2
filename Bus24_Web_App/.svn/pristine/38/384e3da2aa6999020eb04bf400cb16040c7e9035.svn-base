@@ -1,0 +1,13 @@
+<html>
+<h1>Home Page </h1>
+<br/><hr/>
+<a href="register">Register</a>
+<br>
+<a href="searchTravel">SearchTravel</a>
+<br/>
+<a href="searchBusAdmin">SearchAdminBus</a>
+<br>
+<a href="registerAgent">Agent Registration</a>
+<br>
+<a href="searchAgent">SearchAgent</a>
+</html>

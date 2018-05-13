@@ -1,0 +1,112 @@
+<html>
+<head>
+<title>Register Insurance</title>
+
+<script type="text/javascript" src="js/angular.js"></script>
+
+<script>
+	var app = angular.module("insurance", []);
+	app.controller("travelController", function($scope, $http) {
+
+		getTravelList();
+		function getTravelList() {
+
+			$http({
+				method : "get",
+				url : "getAllTravel"
+			}).then(function(response) {
+				console.log(response);
+				$scope.travelList = JSON.parse(response.data.data);
+				// 				console.log($scope.travelList.travelId);
+
+			}, function(response) {
+				console.log(response);
+				$window.alert("failed");
+			});
+		}
+	});
+	
+	
+	app.controller("insuranceController", function($scope, $http,
+			$window) {
+		$scope.register = function() {
+
+			if (!$window.confirm("Are u sure?")) {
+				return;
+			}
+
+			$scope.message = "";
+
+			$http({
+				method : "POST",
+				url : "/Bus24/registerInsurance",
+				data : {
+					"travel":{
+						"travelId":$scope.travelId
+					},
+					"companyName" : $scope.cname,
+					"amount":$scope.amount
+				}
+
+			}).then(function(result) {
+
+				var data = angular.fromJson(result.data);
+				var message = data.message;
+
+				$scope.message = message;
+
+				if (data.status == "FAILURE") {
+
+// 					$scope.messageColor = [ 'text-center', 'text-danger' ];
+				} else {
+					$scope.messageColor = [ 'text-center', 'text-success' ];
+// 					$scope.amenityName = "";
+
+				}
+				$scope.getAllAmenity();
+
+			}, function(result) {
+				$scope.message = message;
+// 				$scope.messageColor = [ 'text-center', 'text-danger' ];
+
+			});
+		}
+	});
+	
+	
+</script>
+</head>
+<body ng-app="insurance">
+	<h1 align="center">Register Insurance Company By Super Admin</h1>
+	<hr />
+	<table align="center" ng-hide="flag">
+		<tr  ng-controller="travelController">
+			<td>Travel</td>
+			<td><select class="form-control" ng-model="travelId"
+				ng-change="getBusesList(travelId)">
+					<option value="">Please Select Travel</option>
+					<option ng-repeat="travel in travelList"
+						value="{{travel.travelId}}">{{travel.travelName}}</option>
+			</select></td>
+		</tr>
+
+		<tr>
+			<td>Company Name :</td>
+			<td><input type="text" ng-model="name"></td>
+		</tr>
+		<tr>
+			<td>Amount:</td>
+			<td><input type="text" ng-model="amount" /></td>
+		</tr>
+		<tr ng-controller="insuranceController">
+			<td colspan="2" align="center">
+				<button value="Register" ng-click="register()">Register</button>
+			</td>
+		</tr>
+		<tr>
+		<td colspan="2" align="center"><b>{{message}}</b></td>
+		
+		</tr>
+	</table>
+</body>
+</html>

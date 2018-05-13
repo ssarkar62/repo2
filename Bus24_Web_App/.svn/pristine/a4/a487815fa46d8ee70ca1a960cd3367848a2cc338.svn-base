@@ -1,0 +1,52 @@
+package com.bus24.web.controller;
+
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.ModelAndView;
+
+import com.bus24.web.service.BookingService;
+
+/**
+ * This class handle the request/response for booking operation
+ * 
+ * @author mulayam
+ *
+ */
+@Controller
+public class BookingController {
+
+	Logger logger = Logger.getLogger(BookingController.class);
+	@Autowired
+	private BookingService bookingService;
+
+	/**
+	 * this method handle the request to getAllPassenger of specific routeId
+	 * 
+	 * @param routeId
+	 * @return
+	 * @author mulayam
+	 * 
+	 */
+	@GetMapping("/getAllPassengers/{routeId}")
+	@ResponseBody
+	public String getAllPassenger(@PathVariable("routeId") Integer routeId) {
+
+		return bookingService.getAllPassengers(routeId);
+	}
+
+	@PostMapping("/bookTicket")
+	@ResponseBody
+	public String bookTicket(@RequestBody String jsonBooking) {
+		logger.info("Entered in bookTicket:" + jsonBooking);
+		String jsonResponse = bookingService.bookTicket(jsonBooking);
+		logger.info("Response from booking:" + jsonBooking);
+		return jsonResponse;
+	}
+
+}

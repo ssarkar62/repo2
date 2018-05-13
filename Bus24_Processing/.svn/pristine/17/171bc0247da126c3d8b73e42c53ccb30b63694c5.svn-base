@@ -1,0 +1,84 @@
+/*Copyright (c) 2017, 2018, Bus24 and/or its affiliates. All rights reserved.
+ * Bus24 PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
+*/
+package com.bus24.service;
+
+
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
+import org.springframework.security.crypto.bcrypt.BCrypt;
+import org.springframework.stereotype.Service;
+
+import com.bus24.beans.Response;
+import com.bus24.beans.User;
+import com.bus24.dao.UsersDAO;
+import com.bus24.util.JsonUtil;
+import com.bus24.util.Roles;
+import com.bus24.util.StatusUtil;
+import com.bus24.util.ValidationUtil;
+/**
+ * This interface is gather user module requirements
+ * @author sathish
+ * @since 1.0
+ */
+@Service
+public class UserServiceImpl implements UserService {
+private static Logger logger=Logger.getLogger(UserServiceImpl.class);	
+	@Autowired
+	private UsersDAO usersDAO;
+    /**
+	 * this method is used to registerPassenger
+	 * @param jsonUser
+	 * @return jsonResponse
+	 */
+	@Override
+	public String registerPassenger(String jsonUser) {
+	logger.info("Entered into registerPassenger : "+jsonUser);
+   Response response=new Response();
+   response.setStatus(StatusUtil.STATUS_FAILURE);
+   response.setMessage("Registration is Failure!Please Try Again");
+	//convert jsonUser into java object
+ User user=JsonUtil.convertJsonToJava(jsonUser,User.class);		
+   try{
+    if(user!=null){ 
+    	 //server side validations
+  if(ValidationUtil.isValidEmail(user.getEmail()) && ValidationUtil.isValidMobile(user.getMobile()) && ValidationUtil.isValidPassword(user.getPassword())){
+    //set userName,userRole,status
+    	 user.setUserName(user.getEmail());
+    	 user.setUserRole(Roles.ROLE_PASSENGER);
+    	 //encrypt the password
+       user.setPassword(BCrypt.hashpw(user.getPassword(),BCrypt.gensalt()));
+    	//call userDao method
+     Long userId=(Long)usersDAO.registerPassenger(user);
+      if(userId!=null && userId>0){
+    	//generate OTP  ,send sms and email and save into db
+    response.setStatus(StatusUtil.STATUS_SUCCESS);
+    response.setMessage("Please Enter OTP Sent to registered mobile");
+     }
+     }else{
+   //prepare jsonResponse as Please Enter Valid inputs
+    	 response.setStatus(StatusUtil.STATUS_FAILURE);
+    	 response.setMessage("Please Enter Valid Input");
+     }
+   }
+     
+   }catch(DataAccessException de){
+		 response.setStatus(StatusUtil.STATUS_FAILURE);
+		 response.setMessage("Unable to process your request!Please Try Again");
+	  logger.error("Exception occured while registering the Passenger :: "+de.getMessage());
+   }catch(Exception e){
+		 response.setStatus(StatusUtil.STATUS_FAILURE);
+		 response.setMessage("Unable to process your request!Please Try Again");
+		  logger.error("Exception occured while registering the Passenger :: "+e.getMessage());
+}
+   //convert Response obj into json
+   String jsonResponse=JsonUtil.convertJavaToJson(response);
+     logger.info("Response from register User :: "+jsonResponse);
+   return jsonResponse;
+	}
+}
+
+
+
+

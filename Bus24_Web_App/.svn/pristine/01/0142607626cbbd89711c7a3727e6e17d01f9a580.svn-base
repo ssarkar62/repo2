@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="app" ng-controller="search_travel_controller">
+<head>
+    <script src="js/angular.js"></script> 
+    <!-- Bootstrap core CSS -->
+<link href="webjars/bootstrap/3.3.5/css/bootstrap.min.css"
+	rel="stylesheet">
+<!-- <link href="webjars/bootstrap/3.3.5/css/bootstrap.theme.min.css"
+	rel="stylesheet"> -->
+	
+	</head>
+<body>
+    <div class="container">
+    <header class="page-header">
+		<ul class="nav nav-pills  pull-right">
+			<li class="active"><a href="/Bus24/">Home</a></li>
+			<li class="active"><a href="/Bus24/about/">About</a></li>
+			<li class="active"><a href="contact.htm">ContactUs</a></li>
+			<li class="active"><a href="searchTravel">SearchTravel</a></li>
+		</ul>
+		<h2>Search Travel Page</h2>
+	</header>
+ <form  class="form-horizontal" ng-hide="flag"> 
+  <div class="form-group">
+    <label for="exampleInputTravelName" class="col-sm-2 control-label">Enter Travel Name</label>
+    <div class="col-sm-5">
+      <input type="text" ng-model="travelName" class="form-control" id="exampleInputTravelName" placeholder="TravelName">
+    </div>
+  </div>
+  
+  <div class="form-group">
+    <label for="exampleInputCity" class="col-sm-2 control-label">Enter City</label>
+    <div class="col-sm-5">
+      <input type="text" ng-model="city" class="form-control" id="exampleInputCity" placeholder="City Name">
+    </div>
+  </div>
+ <div class="row">
+  <div class="col-sm-offset-4 com-sm-10">
+    <button type="button" class="btn btn-success btn-lg" ng-click="searchTravel(travelName,city)" type="submit" >Search</button>
+  </div>
+  </div>
+ </form>
+ <br>
+ <div >
+ <table class="table table-bordered" ng-show="flag">
+     <tr >
+         <th class="active">TravelId</th>
+         <th class="success">TravelRegNumber</th>
+         <th class="warning">TravelName</th>
+         <th class="danger">PhoneNumber1</th>
+         <th class="info">PhoneNumber2</th>
+         <th class="success">Website</th>
+         <th class="warning">Email</th>
+         <th class="danger">AddressLine1</th>
+         <th class="info">AddressLine2</th>
+         <th class="success">City</th> 
+         <th class="warning">State</th>
+         <th class="danger">Zipcode</th>
+         <th class="info">Status</th>
+         <th class="active">BankId</th>
+         <th class="warning">AccountNumber</th>
+         
+         <th class="success">BankName</th>
+         <th class="info">IfscCode</th>
+         <th class="danger">BankBranch</th>
+         <th class="success">AccHolderName</th>
+         <th class="warning">OPERATION</th>
+     </tr>
+      <tr ng-repeat="travels in travel">
+        <td class="active">{{travels.travelId}}</td>
+        <td class="success">{{travels.travelRegNumber}}</td>
+        <td class="warning">{{travels.travelName}}</td>
+        <td class="danger">{{travels.phoneNumber1}}</td>
+        <td class="info">{{travels.phoneNumber2}}</td>
+        <td class="success">{{travels.website}}</td>
+        <td class="warning">{{travels.email}}</td>
+        <td class="danger">{{travels.addressLine1}}</td>
+        <td class="info">{{travels.addressLine2}}</td>
+        <td class="success">{{travels.city}}</td>
+        <td  class="warning">{{travels.state}}</td>
+        <td class="danger">{{travels.zipcode}}</td>
+        <td class="info">{{travels.status}}</td>
+        <td class="active">{{travels.bankDetails.bankId}}</td>
+        <td  class="warning">{{travels.bankDetails.accountNumber}}</td>
+        <td  class="success">{{travels.bankDetails.bankName}}</td>
+        <td class="info">{{travels.bankDetails.ifscCode}}</td>
+        <td class="danger">{{travels.bankDetails.bankBranch}}</td>
+        <td class="success">{{travels.bankDetails.accHolderName}}</td>
+        <td class="warning"><button ng-click="editTravel()" class="btn btn-success btn-md">Edit</button>      </td>
+     </tr>
+</table>
+</div>
+ 
+    <script>
+        var app=angular.module("app",[]);
+        app.controller("search_travel_controller",search_travel_controller);
+        function search_travel_controller($scope,$window,$http) {
+        	
+        	$scope.editTravel=function(){
+        		$window.alert("calling");
+        		$window.alert($scope.travelId);
+        		/* $http({
+        			method:"post",
+        			url:"/Bus24/editTravel",
+        			params:{
+        				"travelId":{{travels.travelId}}
+        			}
+        		}).then(function(result){
+        			
+        		},function(result){
+        			
+        		}); */
+        	}
+           $scope.searchTravel=function(travelName,cityName){
+        	   $window.alert(travelName+"   "+cityName);
+        	   $scope.flag=false; 
+        	   $http({
+   				method : "post",
+   				url : "/Bus24/searchTravel",
+   				params : {
+   					"travelName": travelName,
+   					"city" : cityName
+   			    }
+   			}).then(function(result) {
+   				$window.alert("success");
+   				
+   					$scope.jsonTravelList = result.data;
+   					$scope.flag="true";
+   	   				$window.alert($scope.jsonTravelList);
+   	   			 $scope.travel = angular.fromJson($scope.jsonTravelList);
+   	   			$window.alert( $scope.travel);
+   	
+   				
+   			}, function(result) {
+   				$window.alert("fail");
+   				$window.alert(result.data);
+   			});
+           }
+        }
+        
+    </script>
+    <hr>
+		<footer>
+		<p style="color:blue;text-align:center">&copy:2017 Search Travel Page Design by: ESHWAR</p>
+		</footer>
+		</div><!--  end container-->
+    </body>	
+</html>

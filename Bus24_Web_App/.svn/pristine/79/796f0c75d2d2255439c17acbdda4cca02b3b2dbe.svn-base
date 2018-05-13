@@ -1,0 +1,7 @@
+package com.bus24.web.service;
+
+import com.bus24.beans.User;
+
+public interface UserService {
+public String registerPassenger(User user);
+}
