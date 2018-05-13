@@ -1,0 +1,3 @@
+com\bus24\integration\cfg\AppCfg.class
+com\bus24\integration\UserSmsServiceClient.class
+com\bus24\integration\UserSmsServiceClientImpl.class
