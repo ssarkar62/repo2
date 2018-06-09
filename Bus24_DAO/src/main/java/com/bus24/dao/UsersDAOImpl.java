@@ -126,16 +126,17 @@ public class UsersDAOImpl implements UsersDAO {
 	 */
 	@Override
 	public Integer updateMyprofile(User user) {
-		int count;
-/*		Integer count = jdbcTemplate.update(SQLConstants.SQL_GET_UPDATE_MYPROFILE, (PreparedStatement ps) -> {
+		//int count;
+		Integer count = jdbcTemplate.update(SQLConstants.SQL_GET_UPDATE_MYPROFILE, (PreparedStatement ps) -> {
 			ps.setString(1, user.getFirstName());
 			ps.setString(2, user.getLastName());
 			ps.setString(3, user.getAddress());
 			ps.setInt(4, user.getZipCode());
 			ps.setLong(5, user.getUserId());
 
-		});*/
-		return  count;
+		});
+		//return  count;
+		return count;
 	}
 
 	/**
